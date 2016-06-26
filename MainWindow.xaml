@@ -1,0 +1,125 @@
+﻿<!-- AUTHOR: Kurt.Degiorgio: UI CODE-->
+<Window x:Class="ImperativeMendalBrotSet.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImperativeMendalBrotSet"
+        mc:Ignorable="d"
+        SizeChanged="Window_SizeChanged"
+        Title="Mandelbrot set" Height="850" Width="850" Icon="Images/Icon.png">
+    <Grid Grid.Column="0" Grid.ColumnSpan="2" Background="#7F000000">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="130"/>
+        </Grid.ColumnDefinitions>
+        <!-- SIDE BAR -->
+        <Border Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Panel.ZIndex="1" 
+                Background="#B24F4F4F" Width="0" 
+                Name="ViewPointsPanel" 
+                HorizontalAlignment="Right">
+            <StackPanel Orientation="Vertical">
+                <Label Foreground="White" Content="Previous View Points"/>
+                <Rectangle Grid.Row="1" Fill="Black" Height="2" Opacity="0.6"/>
+                <ListBox SelectionMode="Single" 
+                         SelectionChanged="ZoomListBox_SelectionChanged" 
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
+                         ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                         Name="ZoomListBox" Grid.Row="2" Margin="4" 
+                         ItemsSource="{Binding Path=ZoomList}" 
+                         Background="Transparent" BorderBrush="{x:Null}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Image Margin="2,0,0,0"
+                                       Grid.Row="2" Name="ImageBoard" 
+                                       Source="{Binding Path=BitMap}" 
+                                       Stretch="UniformToFill" 
+                                       Width="100" Height="100"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Name="TriggerPannelClose"  Visibility="Collapsed">
+                    <Button.Triggers>
+                        <EventTrigger RoutedEvent="Button.Click">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation 
+                                           Storyboard.TargetName="ViewPointsPanel"
+                                           Storyboard.TargetProperty="(Grid.Width)" 
+                                           From="130" To="0" Duration="0:0:0.2" AutoReverse="False"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Button.Triggers>
+                </Button>
+            </StackPanel>
+        </Border>
+        <!-- Controls -->
+        <Border  Grid.ColumnSpan="2" BorderBrush="#B2000000" BorderThickness="3">
+            <Border.Background>
+                <ImageBrush ImageSource="Images/UITexture.jpg" TileMode="Tile"/>
+            </Border.Background>
+            <StackPanel Orientation="Horizontal" Background="#4C4F4F4F">
+                <Rectangle Width="5" Fill="Black" Opacity="0.3"></Rectangle>
+                <Button Name="StopButton" Content="Stop" Margin="5,5,5,0" Padding="5" VerticalAlignment="Center" IsEnabled="{Binding Path=ImageVM.CanCancel}" Click="StopButton_Click"/>
+                <Border IsEnabled="{Binding Path=ImageVM.Free}" BorderThickness="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Export" Margin="5,5,5,0" Padding="5"  VerticalAlignment="Center" Click="ExportBtn_Click"/>
+                        <Button Content="Restore" Margin="5,5,5,0" Padding="5" Click="ResetButton_Click"  VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Fill="Black" Opacity="0.3"></Rectangle>
+
+                        <Label VerticalAlignment="Center" Content="Iterations:"  FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+                        <TextBox Name="IterationTextBox"  Width="50" Height="24" HorizontalAlignment="Center"  VerticalAlignment="Center" LostFocus="IterationTextBox_LostFocus"/>
+
+                        <Label VerticalAlignment="Center" Content="Segments: " FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+                        <TextBox  Text="{Binding Path=ConfigsVM.SegmentIndex,Mode=TwoWay}" Width="50" Height="24"  HorizontalAlignment="Center"  VerticalAlignment="Center"/>
+                        <Label VerticalAlignment="Center" Content="Draw Delay:"  FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+                        <TextBox  Text="{Binding Path=ConfigsVM.DrawDelayMS,Mode=TwoWay}" Width="50" Height="24" HorizontalAlignment="Center"  VerticalAlignment="Center"/>
+
+                        <Label VerticalAlignment="Center" Content="Color:" Margin="0" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+                        <ComboBox Name="ColorScheme" Width="100" Height="25" SelectionChanged="ColorScheme_SelectionChanged" Margin="0,0,5,0" />
+                        
+                        <Rectangle Width="5" Fill="Black" Opacity="0.3"/>
+                        <Button Name="btnZoomout" Click="ZoomOut_Click"  Margin="5" Padding="5" VerticalAlignment="Center"  Content="Zoom-out"/>
+                        <Button Name="TriggerPannelOpen" Visibility="Collapsed">
+                            <Button.Triggers>
+                                <EventTrigger RoutedEvent="Button.Click">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation 
+                                        Storyboard.TargetName="ViewPointsPanel"
+                                        Storyboard.TargetProperty="(Grid.Width)" 
+                                        From="0" To="130" Duration="0:0:0.2" AutoReverse="False"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Rectangle Width="5" Fill="Black" Opacity="0.3" Height="45" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        <!-- Canvas, Main screen, Mandelbrot will be depicted here -->
+        <Canvas  Name="CanvasBoard"  Grid.ColumnSpan="2" Background="Black" Grid.Row="1"  MouseLeftButtonUp="Canvas_MouseReleased" MouseMove="CanvasBoard_MouseMove" MouseLeftButtonDown="Canvas_Clicked" >
+            <Image  Name="ImageBoard" Source="{Binding Path=ImageSource}" Stretch="UniformToFill" Width="{Binding Path=ConfigsVM.Width}" Height="{Binding Path=ConfigsVM.Height}"  />
+            <Rectangle Name="SelectionRectangle" Stroke="BlueViolet" Fill="#7F9700FF"  StrokeThickness = "1"  Width="0" Height="0"/>
+            <TextBlock Canvas.Left="10" TextWrapping="Wrap" Text="Status:" Canvas.Bottom="60" Foreground="White" FontWeight="Bold" Opacity="0.7"/>
+            <TextBlock x:Name="StatusValue" Canvas.Left="62" TextWrapping="Wrap" Text="{Binding Path=Status}" Canvas.Bottom="60" Foreground="White" FontWeight="Bold"  Opacity="0.8"/>
+            <TextBlock  Canvas.Left="10" TextWrapping="Wrap" Text="Width:" Canvas.Bottom="40" Foreground="White" FontWeight="Bold"  Opacity="0.7"/>
+            <TextBlock x:Name="WidthValue" Text="{Binding Path=ConfigsVM.Width}" Canvas.Left="62" TextWrapping="Wrap"  Canvas.Bottom="40" Foreground="White" FontWeight="Bold" Opacity="0.8"/>
+            <TextBlock Canvas.Left="10" TextWrapping="Wrap" Text="Height:" Canvas.Bottom="20" Foreground="White" FontWeight="Bold"  Opacity="0.7"/>
+            <TextBlock x:Name="HeightValue" Canvas.Left="62" TextWrapping="Wrap" Text="{Binding Path=ConfigsVM.Height}" Canvas.Bottom="20" Foreground="White" FontWeight="Bold"  Opacity="0.8"/>
+        </Canvas>
+    </Grid>
+</Window>
